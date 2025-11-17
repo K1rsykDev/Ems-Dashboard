@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Звіт складу EMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="page__header">
+      <div class="title">
+        <div class="title__badge">EMS</div>
+        <div>
+          <h1 class="title__heading">Звіт складу</h1>
+          <p class="title__subheading">Фіксуйте видані матеріали та надсилайте звіт у Discord.</p>
+        </div>
+      </div>
+      <div class="stats" id="overallUnits">Загалом: 0 од</div>
+    </header>
+
+    <form id="reportForm" class="card">
+      <section class="card__section">
+        <h2 class="section__title">Дані відповідального</h2>
+        <div class="grid grid--2cols">
+          <label class="field">
+            <span class="field__label">Нік</span>
+            <input type="text" id="nickname" name="nickname" placeholder="MedicName" required />
+          </label>
+          <label class="field">
+            <span class="field__label">Static (#12345)</span>
+            <input type="text" id="staticId" name="static" placeholder="#12345" pattern="#\d+" required />
+          </label>
+        </div>
+      </section>
+
+      <section class="card__section">
+        <div class="section__title-row">
+          <h2 class="section__title">Предмети</h2>
+          <span class="section__helper">Зазначте кількість, яку видали зі складу</span>
+        </div>
+
+        <div class="items" id="itemsContainer">
+          <!-- Items rendered by JS -->
+        </div>
+      </section>
+
+      <section class="card__section card__section--footer">
+        <div>
+          <p class="footer__helper">Перевірте дані перед відправкою. Повідомлення автоматично надійде у Discord.</p>
+          <p class="footer__note" id="validationMessage"></p>
+        </div>
+        <button type="submit" class="btn">Відправити звіт</button>
+      </section>
+    </form>
+  </main>
+
+  <template id="itemTemplate">
+    <div class="item">
+      <div class="item__icon" aria-hidden="true"></div>
+      <div class="item__body">
+        <div class="item__top">
+          <div>
+            <div class="item__name"></div>
+            <div class="item__value"></div>
+          </div>
+          <input class="item__input" type="number" min="0" value="0" />
+        </div>
+        <div class="item__subtotal">0 од</div>
+      </div>
+    </div>
+  </template>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
