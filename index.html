@@ -24,7 +24,7 @@
 
     <form id="reportForm" class="card">
       <section class="card__section">
-        <h2 class="section__title">Дані заповнювача</h2>
+        <h2 class="section__title">Дані відповідального</h2>
         <div class="grid grid--2cols">
           <label class="field">
             <span class="field__label">Нік</span>
@@ -32,7 +32,7 @@
           </label>
           <label class="field">
             <span class="field__label">Static (#12345)</span>
-            <input type="text" id="staticId" name="static" placeholder="#12345" required />
+            <input type="text" id="staticId" name="static" placeholder="#12345" pattern="#\d+" required />
           </label>
         </div>
       </section>
@@ -58,6 +58,8 @@
     </form>
   </main>
 
+  <footer class="page__footer">© 2024 EMS. Зроблено by Kenji.</footer>
+
   <template id="itemTemplate">
     <div class="item">
       <div class="item__icon" aria-hidden="true"></div>
@@ -67,7 +69,7 @@
             <div class="item__name"></div>
             <div class="item__value"></div>
           </div>
-          <input class="item__input" type="number" min="0" value="0" />
+          <input class="item__input" type="number" step="1" min="0" value="0" />
         </div>
         <div class="item__subtotal">0 од</div>
       </div>
