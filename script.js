@@ -51,15 +51,8 @@ function updateOverall() {
   return totalUnits;
 }
 
-function buildMessage(nickname, staticId) {
-  const lines = [
-    `**Звіт складу (EMS)**`,
-    `Відповідальний: ${nickname}`,
-    `Static: ${staticId}`,
-    '',
-    '**Видано зі складу:**',
-  ];
-
+function buildEmbed(nickname, staticId) {
+  const itemLines = [];
   let totalUnits = 0;
 
   itemInputs.forEach(({ input, item }) => {
@@ -67,12 +60,29 @@ function buildMessage(nickname, staticId) {
     if (qty > 0) {
       const itemTotal = qty * item.value;
       totalUnits += itemTotal;
-      lines.push(`- ${item.name}: ${qty} шт (${itemTotal} од)`);
+      itemLines.push(`${item.icon} ${item.name} — ${qty} шт (${itemTotal} од)`);
     }
   });
 
-  lines.push('', `Загальна кількість: ${totalUnits} од`);
-  return { content: lines.join('\n'), totalUnits };
+  const embed = {
+    title: 'Звіт складу (EMS)',
+    color: 0x2b6cb0,
+    fields: [
+      { name: 'Ваш нік', value: nickname, inline: false },
+      { name: 'Static', value: staticId, inline: true },
+      {
+        name: 'Видано зі складу',
+        value: itemLines.join('\n') || '—',
+        inline: false,
+      },
+      { name: 'Загальна кількість', value: `${totalUnits} од`, inline: true },
+    ],
+    footer: {
+      text: `Надіслано: ${new Date().toLocaleString('uk-UA')}`,
+    },
+  };
+
+  return { embed, totalUnits };
 }
 
 function showToast(message, type = 'success') {
@@ -87,7 +97,7 @@ async function sendReport(payload) {
   const response = await fetch(webhookUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content: payload.content }),
+    body: JSON.stringify({ embeds: [payload.embed] }),
   });
 
   if (!response.ok) {
@@ -107,7 +117,7 @@ form.addEventListener('submit', async (event) => {
     return;
   }
 
-  const { content, totalUnits } = buildMessage(nickname, staticId);
+  const { embed, totalUnits } = buildEmbed(nickname, staticId);
 
   if (totalUnits === 0) {
     validationMessage.textContent = 'Додайте хоча б один предмет.';
@@ -117,7 +127,7 @@ form.addEventListener('submit', async (event) => {
   form.querySelector('button[type="submit"]').disabled = true;
 
   try {
-    await sendReport({ content });
+    await sendReport({ embed });
     showToast('Звіт відправлено в Discord');
     form.reset();
     itemInputs.forEach(({ subtotal }) => (subtotal.textContent = '0 од'));
