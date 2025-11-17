@@ -1,13 +1,1 @@
-<svg xmlns="https://i.imgur.com/BSbkGc7.png" viewBox="0 0 64 64" role="img" aria-label="EMS icon">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1c2a5c"/>
-      <stop offset="100%" stop-color="#36b5ff"/>
-    </linearGradient>
-  </defs>
-  <rect width="64" height="64" rx="12" fill="url(#g)"/>
-  <path fill="#0c1021" opacity="0.4" d="M8 38c5 6 13 9 24 9s19-3 24-9V26c-5-6-13-9-24-9S13 20 8 26z"/>
-  <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="'Inter', system-ui, sans-serif" font-weight="700" font-size="22">EMS</text>
-</svg>
-index.html
-New
+
