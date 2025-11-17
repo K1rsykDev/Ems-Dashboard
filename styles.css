@@ -32,6 +32,15 @@ body {
   padding: 48px 16px 64px;
 }
 
+.page__footer {
+  max-width: 960px;
+  margin: 24px auto 32px;
+  padding: 0 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .page__header {
   display: flex;
   justify-content: space-between;
