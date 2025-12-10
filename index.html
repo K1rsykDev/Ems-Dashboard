@@ -3,80 +3,93 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Звіт складу EMS</title>
+  <title>Оголошення Discord</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <main class="page">
-    <header class="page__header">
-      <div class="title">
-        <div class="title__badge">EMS</div>
-        <div>
-          <h1 class="title__heading">Звіт складу</h1>
-          <p class="title__subheading">Фіксуйте видані матеріали та надсилайте звіт у Discord.</p>
-        </div>
+  <header class="hero">
+    <div class="hero__content">
+      <p class="badge">Discord</p>
+      <h1>Оголошення "Продам" / "Куплю"</h1>
+      <p class="subtitle">Заповніть форму та відправте оголошення напряму у Discord через Webhook.</p>
+      <div class="hero__actions">
+        <button class="btn btn--primary" data-type="sell" id="sellBtn">Продам</button>
+        <button class="btn btn--ghost" data-type="buy" id="buyBtn">Куплю</button>
       </div>
-      <div class="stats" id="overallUnits">Загалом: 0 од</div>
-    </header>
+    </div>
+    <div class="hero__card">
+      <p class="note">Тип оголошення: <span id="selectedType">Не обрано</span></p>
+      <p class="note">Після відправки ви отримаєте підтвердження.</p>
+    </div>
+  </header>
 
-    <form id="reportForm" class="card">
-      <section class="card__section">
-        <h2 class="section__title">Дані відповідального</h2>
-        <div class="grid grid--2cols">
-          <label class="field">
-            <span class="field__label">Нік</span>
-            <input type="text" id="nickname" name="nickname" placeholder="MedicName" required />
-          </label>
-          <label class="field">
-            <span class="field__label">Static (#12345)</span>
-            <input type="text" id="staticId" name="static" placeholder="#12345" pattern="#\d+" required />
-          </label>
-        </div>
-      </section>
+  <main class="container">
+    <form id="announcementForm" class="form">
+      <div class="form__grid">
+        <label class="field">
+          <span class="field__label">NickName у грі*</span>
+          <input type="text" name="nickname" id="nickname" required placeholder="Ваш нік" />
+        </label>
+        <label class="field">
+          <span class="field__label">Номер телефону*</span>
+          <input type="text" name="phone" id="phone" required placeholder="+38..." />
+        </label>
+        <label class="field">
+          <span class="field__label">Static*</span>
+          <input type="text" name="static" id="static" required placeholder="#12345" />
+        </label>
+        <label class="field">
+          <span class="field__label">Discord*</span>
+          <input type="text" name="discord" id="discord" required placeholder="username#0000" />
+        </label>
+      </div>
 
-      <section class="card__section">
-        <div class="section__title-row">
-          <h2 class="section__title">Предмети</h2>
-          <span class="section__helper">Зазначте кількість, яку видали зі складу</span>
-        </div>
+      <div class="form__row">
+        <label class="field">
+          <span class="field__label">Категорія товару*</span>
+          <select name="category" id="category" required>
+            <option value="" disabled selected>Оберіть категорію</option>
+            <option value="Транспорт">Транспорт</option>
+            <option value="Аксесуари">Аксесуари</option>
+            <option value="Одяг">Одяг</option>
+            <option value="Рюкзаки">Рюкзаки</option>
+            <option value="Зброя">Зброя</option>
+            <option value="Інше">Інше</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="field__label">Тип оголошення*</span>
+          <input type="text" id="announcementType" name="type" readonly placeholder="Обрати кнопкою вище" required />
+        </label>
+      </div>
 
-        <div class="items" id="itemsContainer">
-          <!-- Items rendered by JS -->
-        </div>
-      </section>
+      <label class="field">
+        <span class="field__label">Назва предмета або транспорту*</span>
+        <input type="text" name="title" id="title" required placeholder="Наприклад, Sultan Classic" />
+      </label>
 
-      <section class="card__section card__section--footer">
-        <div>
-          <p class="footer__helper">Перевірте дані перед відправкою. Повідомлення автоматично надійде у Discord.</p>
-          <p class="footer__note" id="validationMessage"></p>
-        </div>
-        <button type="submit" class="btn">Відправити звіт</button>
-      </section>
+      <label class="field">
+        <span class="field__label">Короткий опис*</span>
+        <textarea name="description" id="description" rows="4" required placeholder="Деталі, стан, ціна та інше"></textarea>
+      </label>
+
+      <label class="field field--file">
+        <span class="field__label">Фото (опційно)</span>
+        <input type="file" name="image" id="image" accept="image/*" />
+        <span class="file__hint">Зображення буде відправлено разом з повідомленням.</span>
+      </label>
+
+      <div class="form__footer">
+        <p class="status" id="statusMessage"></p>
+        <button type="submit" class="btn btn--primary" id="submitBtn">Відправити</button>
+      </div>
     </form>
   </main>
 
-  <footer class="page__footer">© 2025 EMS. Зроблено by Kenji.</footer>
-
-  <template id="itemTemplate">
-    <div class="item">
-      <div class="item__icon" aria-hidden="true"></div>
-      <div class="item__body">
-        <div class="item__top">
-          <div>
-            <div class="item__name"></div>
-            <div class="item__value"></div>
-          </div>
-          <input class="item__input" type="number" step="1" min="0" value="0" />
-        </div>
-        <div class="item__subtotal">0 од</div>
-      </div>
-    </div>
-  </template>
-
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="toast" id="toast"></div>
 
   <script src="script.js"></script>
 </body>

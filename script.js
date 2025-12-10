@@ -1,143 +1,142 @@
-const webhookUrl = 'https://discord.com/api/webhooks/1439799327680889016/e_rq0csWqzA-zKSKB4O6BGO85Qy5WAVefKvjqK6c1l3Hi8zcLQi76ohNIIPTxZAoe6WN';
+// URL вебхука. Змініть значення за потреби.
+const webhookUrl = 'https://discord.com/api/webhooks/replace-with-your-webhook';
 
-const items = [
-  { name: 'Бронежилет', value: 100, icon: '🛡️' },
-  { name: 'Велика аптечка', value: 75, icon: '🧰' },
-  { name: 'Маленька аптечка', value: 25, icon: '💊' },
-  { name: 'Адреналін', value: 50, icon: '⚡' },
-  { name: 'Форма', value: 300, icon: '👕' },
-];
+const typeMap = {
+  sell: 'Продам',
+  buy: 'Куплю',
+};
 
-const form = document.getElementById('reportForm');
-const itemsContainer = document.getElementById('itemsContainer');
-const overallUnits = document.getElementById('overallUnits');
-const validationMessage = document.getElementById('validationMessage');
+const form = document.getElementById('announcementForm');
+const statusMessage = document.getElementById('statusMessage');
 const toast = document.getElementById('toast');
-const itemTemplate = document.getElementById('itemTemplate');
+const announcementTypeInput = document.getElementById('announcementType');
+const selectedType = document.getElementById('selectedType');
+const submitBtn = document.getElementById('submitBtn');
+const imageInput = document.getElementById('image');
+const typeButtons = [document.getElementById('sellBtn'), document.getElementById('buyBtn')];
 
-const itemInputs = [];
-
-function renderItems() {
-  items.forEach((item) => {
-    const clone = itemTemplate.content.cloneNode(true);
-    const icon = clone.querySelector('.item__icon');
-    const name = clone.querySelector('.item__name');
-    const value = clone.querySelector('.item__value');
-    const input = clone.querySelector('.item__input');
-    const subtotal = clone.querySelector('.item__subtotal');
-
-    icon.textContent = item.icon;
-    name.textContent = item.name;
-    value.textContent = `${item.value} од за 1 шт.`;
-
-    input.addEventListener('input', () => {
-      const qty = Number.parseInt(input.value, 10) || 0;
-      const total = qty * item.value;
-      subtotal.textContent = `${total} од`;
-      updateOverall();
-    });
-
-    itemInputs.push({ input, item, subtotal });
-    itemsContainer.appendChild(clone);
+function setType(typeKey) {
+  const label = typeMap[typeKey];
+  announcementTypeInput.value = label;
+  selectedType.textContent = label;
+  typeButtons.forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.type === typeKey);
+    btn.classList.toggle('btn--primary', btn.dataset.type === typeKey);
+    btn.classList.toggle('btn--ghost', btn.dataset.type !== typeKey);
   });
 }
 
-function updateOverall() {
-  const totalUnits = itemInputs.reduce((sum, { input, item }) => {
-    const qty = Number.parseInt(input.value, 10) || 0;
-    return sum + qty * item.value;
-  }, 0);
-  overallUnits.textContent = `Загалом: ${totalUnits} од`;
-  return totalUnits;
-}
-
-function buildEmbed(nickname, staticId) {
-  const itemLines = [];
-  let totalUnits = 0;
-
-  itemInputs.forEach(({ input, item }) => {
-    const qty = Number.parseInt(input.value, 10) || 0;
-    if (qty > 0) {
-      const itemTotal = qty * item.value;
-      totalUnits += itemTotal;
-      itemLines.push(`${item.icon} ${item.name} — ${qty} шт (${itemTotal} од)`);
-    }
-  });
-
-  const embed = {
-    title: 'Звіт складу (EMS)',
-    color: 0x2b6cb0,
-    fields: [
-      { name: 'Ваш нік', value: nickname, inline: false },
-      { name: 'Static', value: staticId, inline: true },
-      {
-        name: 'Видано зі складу',
-        value: itemLines.join('\n') || '—',
-        inline: false,
-      },
-      { name: 'Загальна кількість', value: `${totalUnits} од`, inline: true },
-    ],
-    footer: {
-      text: `Надіслано: ${new Date().toLocaleString('uk-UA')}`,
-    },
-  };
-
-  return { embed, totalUnits };
-}
+typeButtons.forEach((btn) =>
+  btn.addEventListener('click', () => {
+    setType(btn.dataset.type);
+  })
+);
 
 function showToast(message, type = 'success') {
   toast.textContent = message;
-  toast.className = 'toast toast--visible ' + (type === 'error' ? 'toast--error' : 'toast--success');
-  setTimeout(() => {
-    toast.classList.remove('toast--visible');
-  }, 3500);
+  toast.className = `toast visible ${type === 'error' ? 'error' : 'success'}`;
+  setTimeout(() => toast.classList.remove('visible'), 3500);
 }
 
-async function sendReport(payload) {
+function validateForm() {
+  const requiredFields = ['nickname', 'phone', 'static', 'discord', 'category', 'type', 'title', 'description'];
+  const isValid = requiredFields.every((name) => {
+    const field = form.elements[name];
+    return field && field.value.trim();
+  });
+  if (!isValid) {
+    statusMessage.textContent = 'Заповніть всі обов’язкові поля.';
+  }
+  return isValid;
+}
+
+function buildEmbed(values, attachmentName) {
+  const titlePrefix = values.type === 'Продам' ? 'Оголошення: ПРОДАМ' : 'Оголошення: КУПЛЮ';
+  const embed = {
+    title: `${titlePrefix} – ${values.title}`,
+    color: values.type === 'Продам' ? 0x3ed598 : 0x48b5ff,
+    fields: [
+      { name: 'Нік у грі', value: values.nickname, inline: true },
+      { name: 'Телефон', value: values.phone, inline: true },
+      { name: 'Static', value: values.static, inline: true },
+      { name: 'Discord', value: values.discord, inline: true },
+      { name: 'Категорія', value: values.category, inline: true },
+      { name: 'Тип оголошення', value: values.type, inline: true },
+      { name: 'Опис', value: values.description, inline: false },
+    ],
+  };
+
+  if (attachmentName) {
+    embed.image = { url: `attachment://${attachmentName}` };
+  }
+
+  return embed;
+}
+
+async function sendToDiscord(embed, file) {
+  if (!webhookUrl || webhookUrl.includes('replace-with-your-webhook')) {
+    throw new Error('Налаштуйте webhookUrl у script.js перед відправкою.');
+  }
+
+  if (file) {
+    const formData = new FormData();
+    const payload = { embeds: [embed] };
+    formData.append('payload_json', JSON.stringify(payload));
+    formData.append('file', file, file.name);
+
+    const response = await fetch(webhookUrl, { method: 'POST', body: formData });
+    if (!response.ok) throw new Error('Сталася помилка під час відправки. Спробуйте ще раз.');
+    return;
+  }
+
   const response = await fetch(webhookUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ embeds: [payload.embed] }),
+    body: JSON.stringify({ embeds: [embed] }),
   });
 
   if (!response.ok) {
-    throw new Error('Не вдалося надіслати звіт у Discord');
+    throw new Error('Сталася помилка під час відправки. Спробуйте ще раз.');
   }
 }
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
-  validationMessage.textContent = '';
+  statusMessage.textContent = '';
 
-  const nickname = form.nickname.value.trim();
-  const staticId = form.static.value.trim();
+  if (!validateForm()) return;
 
-  if (!nickname || !staticId) {
-    validationMessage.textContent = 'Заповніть всі поля.';
-    return;
-  }
+  const file = imageInput.files?.[0];
+  const values = {
+    nickname: form.nickname.value.trim(),
+    phone: form.phone.value.trim(),
+    static: form.static.value.trim(),
+    discord: form.discord.value.trim(),
+    category: form.category.value,
+    type: form.type.value.trim(),
+    title: form.title.value.trim(),
+    description: form.description.value.trim(),
+  };
 
-  const { embed, totalUnits } = buildEmbed(nickname, staticId);
+  const embed = buildEmbed(values, file?.name);
 
-  if (totalUnits === 0) {
-    validationMessage.textContent = 'Додайте хоча б один предмет.';
-    return;
-  }
-
-  form.querySelector('button[type="submit"]').disabled = true;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Відправка...';
 
   try {
-    await sendReport({ embed });
-    showToast('Звіт відправлено в Discord');
+    await sendToDiscord(embed, file);
+    showToast('Ваше оголошення успішно відправлено в Discord.');
+    statusMessage.textContent = 'Ваше оголошення успішно відправлено в Discord.';
     form.reset();
-    itemInputs.forEach(({ subtotal }) => (subtotal.textContent = '0 од'));
-    updateOverall();
+    selectedType.textContent = 'Не обрано';
+    announcementTypeInput.value = '';
+    typeButtons.forEach((btn) => btn.classList.remove('active'));
   } catch (error) {
-    showToast(error.message, 'error');
+    const message = error.message || 'Сталася помилка під час відправки. Спробуйте ще раз.';
+    showToast(message, 'error');
+    statusMessage.textContent = message;
   } finally {
-    form.querySelector('button[type="submit"]').disabled = false;
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Відправити';
   }
 });
-
-renderItems();
-updateOverall();
