@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PixelForge Admin</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <div class="navbar">
+    <a class="brand" href="index.html">← Pixel<span>Forge</span> Admin</a>
+    <nav class="nav-links">
+      <a href="#orders">Заявки</a>
+      <a href="#gallery">Портфоліо</a>
+    </nav>
+  </div>
+</header>
+
+<section class="order-section">
+  <h2>Вхід адміністратора</h2>
+  <p class="muted">Введіть логін та пароль, щоб працювати з заявками та галереєю.</p>
+  <form id="loginForm" class="form" autocomplete="off">
+    <label class="label">Логін</label>
+    <input class="input" type="text" name="username" required placeholder="admin">
+    <label class="label">Пароль</label>
+    <input class="input" type="password" name="password" required placeholder="••••••">
+    <button class="btn" type="submit">Увійти</button>
+    <div id="loginStatus" class="status-banner"></div>
+  </form>
+</section>
+
+<section id="orders" class="order-section" style="display:none;">
+  <h2>Заявки</h2>
+  <div class="table-wrapper">
+    <table class="table" id="ordersTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Нікнейм</th>
+          <th>Тип</th>
+          <th>Опис</th>
+          <th>Оплата</th>
+          <th>Статус</th>
+          <th>Дата</th>
+          <th>Дії</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="gallery" class="order-section" style="display:none;">
+  <h2>Керування портфоліо</h2>
+  <form id="galleryForm" class="form" enctype="multipart/form-data">
+    <label class="label">Назва / тип роботи *</label>
+    <input class="input" name="title" required placeholder="Аватарка для стрімера">
+    <label class="label">Зображення *</label>
+    <input class="file-input" type="file" name="image" accept="image/*" required>
+    <button class="btn" type="submit">Додати роботу</button>
+    <div id="galleryStatus" class="status-banner"></div>
+  </form>
+  <div class="gallery" style="padding-left:0;padding-right:0;">
+    <div id="adminGallery" class="grid"></div>
+  </div>
+</section>
+
+<script>
+  window.API_BASE = localStorage.getItem('pixelforge_api') || 'http://localhost:3000/api';
+</script>
+<script src="admin.js"></script>
+</body>
+</html>
